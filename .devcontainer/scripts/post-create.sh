@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+echo "[devcontainer] Running post-create script"
+
+# If there are project-level setup scripts, run them (non-fatal)
+if [ -f "scripts/create-issues.sh" ]; then
+  echo "[devcontainer] Running workspace scripts/create-issues.sh"
+  bash "scripts/create-issues.sh" || true
+fi
+
+echo "[devcontainer] Post-create complete"
+#!/usr/bin/env bash
+set -euo pipefail
+
 echo "Running DevContainer post-create: ensure Gradle wrapper exists"
 
 if [ -f ./gradlew ]; then
