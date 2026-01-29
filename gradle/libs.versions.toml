@@ -1,0 +1,62 @@
+[versions]
+# Java & Build
+javaVersion = "21"
+gradleVersion = "8.5"
+
+# Spring
+springBoot = "3.4.2"
+springDependencyManagement = "1.1.7"
+
+# Logging
+slf4j = "2.0.9"
+
+# JSON
+jackson = "2.16.0"
+
+# OpenTelemetry
+opentelemetry = "1.33.0"
+
+# Security & Cryptography
+bouncycastle = "1.77"
+argon2 = "2.11"
+
+# Spring Data
+springDataRedis = "3.2.1"
+
+# Testing
+junit = "5.10.1"
+assertj = "3.24.2"
+mockito = "5.8.0"
+
+[libraries]
+# Spring Boot
+spring-boot-starter = { module = "org.springframework.boot:spring-boot-starter", version.ref = "springBoot" }
+spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "springBoot" }
+
+# Logging
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+
+# JSON
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
+
+# OpenTelemetry
+opentelemetry-api = { module = "io.opentelemetry:opentelemetry-api", version.ref = "opentelemetry" }
+opentelemetry-sdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "opentelemetry" }
+
+# Security & Cryptography
+bouncycastle-provider = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
+argon2-jvm = { module = "de.mkammerer:argon2-jvm", version.ref = "argon2" }
+
+# Spring Data
+spring-data-redis = { module = "org.springframework.data:spring-data-redis", version.ref = "springDataRedis" }
+
+# Testing
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+
+[plugins]
+spring-boot = { id = "org.springframework.boot", version.ref = "springBoot" }
+spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "springDependencyManagement" }
