@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.spring.boot) apply false
     alias(libs.plugins.spring.dependency.management) apply false
+    alias(libs.plugins.spotless) apply false
 }
 
 allprojects {
@@ -16,6 +17,8 @@ subprojects {
     apply(plugin = "java")
     apply(plugin = "java-library")
     apply(plugin = "io.spring.dependency-management")
+    apply(plugin = "checkstyle")
+    apply(plugin = "com.diffplug.spotless")
 
     val libs = rootProject.libs
 
@@ -26,6 +29,26 @@ subprojects {
         }
     }
 
+    // Checkstyle 설정
+    configure<CheckstyleExtension> {
+        toolVersion = libs.versions.checkstyle.get()
+        configFile = rootProject.file("config/checkstyle/checkstyle.xml")
+        configDirectory.set(rootProject.file("config/checkstyle"))
+        isIgnoreFailures = false
+        maxWarnings = 0
+    }
+
+    // Spotless 설정
+    configure<com.diffplug.gradle.spotless.SpotlessExtension> {
+        java {
+            target("src/**/*.java")
+            googleJavaFormat(libs.versions.googleJavaFormat.get())
+            removeUnusedImports()
+            trimTrailingWhitespace()
+            endWithNewline()
+        }
+    }
+
     tasks.withType<JavaCompile> {
         options.encoding = "UTF-8"
         options.compilerArgs.addAll(listOf("-parameters"))
@@ -33,6 +56,11 @@ subprojects {
 
     tasks.withType<Test> {
         useJUnitPlatform()
+    }
+
+    // build task가 code quality checks를 포함하도록 설정
+    tasks.named("check") {
+        dependsOn("checkstyleMain", "checkstyleTest", "spotlessCheck")
     }
 
     dependencies {

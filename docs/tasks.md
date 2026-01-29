@@ -18,7 +18,7 @@
 
 ### 브랜치 워크플로우
 
-1. 이슈 확인 후 브랜치 생성: `feature/P0-01-01-gradle-kotlin-dsl`
+1. 이슈 확인 후 브랜치 생성: `feature/P0-01-04-code-style`
 2. 작업 완료 후 PR 생성 (`closes #1`)
 3. CI 통과 → Squash Merge → 브랜치 삭제
 

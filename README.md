@@ -167,6 +167,67 @@ Closes #1
 - Delete feature branches after merge
 - PR required for all merges
 
+## Code Style
+
+This project follows **Google Java Style Guide** for consistent code formatting and quality.
+
+### Tools
+
+- **EditorConfig** - IDE-agnostic formatting rules (`.editorconfig`)
+- **Checkstyle** - Static analysis and style enforcement (`config/checkstyle/checkstyle.xml`)
+- **Spotless** - Automatic code formatting with google-java-format
+
+### Key Conventions
+
+- **Indentation**: 2 spaces (no tabs)
+- **Line Length**: 100 characters maximum
+- **Encoding**: UTF-8
+- **Line Endings**: LF (Unix-style)
+- **Imports**: No star imports, unused imports removed
+- **Javadoc**: Required for public APIs (methods > 2 lines)
+
+### Local Checks
+
+```bash
+# Check code style (without fixing)
+./gradlew spotlessCheck checkstyleMain checkstyleTest
+
+# Auto-fix formatting issues
+./gradlew spotlessApply
+
+# Run all checks (including code style)
+./gradlew check
+```
+
+### IDE Integration
+
+**VS Code** (DevContainer):
+- EditorConfig extension pre-installed
+- Format on save enabled automatically
+- Java formatting uses `.editorconfig` settings
+
+**IntelliJ IDEA**:
+1. Install EditorConfig plugin (built-in)
+2. Enable Settings → Editor → Code Style → Enable EditorConfig support
+3. (Optional) Import `config/checkstyle/checkstyle.xml` for additional hints
+
+### CI Enforcement
+
+All pull requests automatically run:
+- `./gradlew spotlessCheck` - Formatting validation
+- `./gradlew checkstyleMain checkstyleTest` - Style rule enforcement
+
+**Fix before pushing**:
+```bash
+./gradlew spotlessApply
+```
+
+### References
+
+- [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html)
+- [EditorConfig Specification](https://editorconfig.org/)
+- [Checkstyle Configuration](config/checkstyle/checkstyle.xml)
+
 ## Phases
 
 | Phase | Duration | Deliverables |
