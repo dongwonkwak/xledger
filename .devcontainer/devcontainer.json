@@ -1,6 +1,79 @@
 {
   "name": "xledger-devcontainer",
-  "image": "mcr.microsoft.com/devcontainers/java:21",
-  "forwardPorts": [8080],
-  "postCreateCommand": "bash .devcontainer/scripts/post-create.sh"
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  "forwardPorts": [
+    8080,
+    5432,
+    6379,
+    9092,
+    16686,
+    9090,
+    3000
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // Java & Kotlin
+        "vscjava.vscode-java-pack",
+        "vscjava.vscode-spring-boot-dashboard",
+        "vmware.vscode-spring-boot",
+        "fwcd.kotlin",
+        "mathiasfrohlich.kotlin",
+        // Gradle
+        "vscjava.vscode-gradle",
+        // Code Quality
+        "editorconfig.editorconfig",
+        "sonarsource.sonarlint-vscode",
+        // Git
+        "eamodio.gitlens",
+        // Docker & Containers
+        "ms-azuretools.vscode-docker",
+        // Data formats
+        "redhat.vscode-yaml",
+        "redhat.vscode-xml",
+        // Testing
+        "vscjava.vscode-java-test",
+        // REST Client
+        "humao.rest-client",
+        // Database
+        "ckolkman.vscode-postgres",
+        // GitHub
+        "github.vscode-pull-request-github"
+      ],
+      "settings": {
+        "java.configuration.runtimes": [
+          {
+            "name": "JavaSE-21",
+            "path": "/usr/local/sdkman/candidates/java/current",
+            "default": true
+          }
+        ],
+        "java.compile.nullAnalysis.mode": "automatic",
+        "java.format.settings.url": ".editorconfig",
+        "files.exclude": {
+          "**/.gradle": true,
+          "**/build": true,
+          "**/.classpath": true,
+          "**/.project": true,
+          "**/.settings": true,
+          "**/.factorypath": true
+        },
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.organizeImports": "explicit"
+        },
+        "[java]": {
+          "editor.defaultFormatter": "redhat.java"
+        }
+      }
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
+  "remoteUser": "vscode"
 }
