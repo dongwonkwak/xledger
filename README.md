@@ -97,11 +97,35 @@ dependencies {
 
 ### Prerequisites
 
-- Java 21 (via SDK manager or direct installation)
-- Docker & Docker Compose (for local infrastructure)
-- VS Code with DevContainer (recommended) or JetBrains Gateway
+- **Java 21** (via SDK manager or direct installation)
+- **Docker & Docker Compose** (for local infrastructure services)
+- **VS Code with DevContainer** (recommended) or JetBrains Gateway
 
-### Build
+### Quick Start
+
+**Step 1: Start Infrastructure (on Host/Local Machine)**
+
+```bash
+# Start infrastructure services (profiled)
+docker compose --profile infra up -d
+
+# Verify services are running
+docker compose ps
+```
+
+**Step 2: Open in DevContainer (VS Code)**
+
+```bash
+# Open in VS Code DevContainer
+code .
+
+# Wait for container to build (first time only)
+# DevContainer will automatically run post-create scripts
+```
+
+**Step 3: Build & Test**
+
+Inside DevContainer terminal:
 
 ```bash
 # Build all modules
@@ -117,16 +141,28 @@ dependencies {
 ./gradlew projects
 ```
 
-### Development Environment
+### Infrastructure Services
 
-This project uses DevContainer for consistent development environments:
+The following services run on your **host machine** via Docker Compose when you start the infra profile:
 
+| Service | Port | Description |
+|---------|------|-------------|
+| PostgreSQL (account) | 5432 | Account service database |
+| PostgreSQL (cash) | 5433 | Cash service database |
+| PostgreSQL (ledger) | 5434 | Ledger service database |
+| PostgreSQL (admin) | 5435 | Admin service database |
+| Redis | 6379 | Cache & idempotency store |
+| Kafka | 29092 | Event bus |
+| Zookeeper | 2181 | Kafka coordination |
+
+**Connection from DevContainer**: Use `localhost` with the ports above.
+
+**Stop infrastructure (keep volumes)**:
 ```bash
-# Open in VS Code DevContainer
-code .
-
-# Or use JetBrains Gateway for remote development
+docker compose --profile infra down
 ```
+
+**Detailed guide**: See [Local Development Guide](docs/local-development.md)
 
 ## Development Workflow
 
@@ -243,6 +279,7 @@ All pull requests automatically run:
 - [Design Document](docs/design.md)
 - [Requirements (EARS)](docs/requirements.md)
 - [Task Breakdown](docs/tasks.md)
+- [Local Development Guide](docs/local-development.md)
 
 ## License
 

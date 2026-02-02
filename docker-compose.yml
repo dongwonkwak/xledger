@@ -1,0 +1,185 @@
+# 1. 네트워크 설계: 도메인 격리 + 공용 인프라망
+networks:
+  account-net: { driver: bridge }
+  cash-net: { driver: bridge }
+  ledger-net: { driver: bridge }
+  admin-net: { driver: bridge }
+  infra-net: { driver: bridge }
+
+# 2. 볼륨 설계: 데이터 영속성 및 개발 캐시
+volumes:
+  postgres-account-data:
+  postgres-cash-data:
+  postgres-ledger-data:
+  postgres-admin-data:
+  redis-data:
+  zookeeper-data:
+  zookeeper-logs:
+  kafka-data:
+  gradle-cache:
+
+services:
+  # ============================================================
+  # PostgreSQL - 도메인별 독립 DB (외부 포트: 5431~5434)
+  # ============================================================
+
+  postgres-account:
+    image: postgres:16-alpine
+    container_name: xledger-postgres-account
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${ACCOUNT_DB_NAME}
+      POSTGRES_USER: ${ACCOUNT_DB_USER}
+      POSTGRES_PASSWORD: ${ACCOUNT_DB_PASSWORD}
+    ports:
+      - "5431:5432" # 외부 툴(DBeaver) 접속용
+    volumes:
+      - postgres-account-data:/var/lib/postgresql/data
+      - ./scripts/db-init/account:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ACCOUNT_DB_USER} -d ${ACCOUNT_DB_NAME}"]
+      interval: 10s
+      retries: 5
+    networks: [account-net, infra-net]
+    profiles: ["infra"]
+
+  postgres-cash:
+    image: postgres:16-alpine
+    container_name: xledger-postgres-cash
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${CASH_DB_NAME}
+      POSTGRES_USER: ${CASH_DB_USER}
+      POSTGRES_PASSWORD: ${CASH_DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-cash-data:/var/lib/postgresql/data
+      - ./scripts/db-init/cash:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${CASH_DB_USER} -d ${CASH_DB_NAME}"]
+      interval: 10s
+      retries: 5
+    networks: [cash-net, infra-net]
+    profiles: ["infra"]
+
+  postgres-ledger:
+    image: postgres:16-alpine
+    container_name: xledger-postgres-ledger
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${LEDGER_DB_NAME}
+      POSTGRES_USER: ${LEDGER_DB_USER}
+      POSTGRES_PASSWORD: ${LEDGER_DB_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-ledger-data:/var/lib/postgresql/data
+      - ./scripts/db-init/ledger:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${LEDGER_DB_USER} -d ${LEDGER_DB_NAME}"]
+      interval: 10s
+      retries: 5
+    networks: [ledger-net, infra-net]
+    profiles: ["infra"]
+
+  postgres-admin:
+    image: postgres:16-alpine
+    container_name: xledger-postgres-admin
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${ADMIN_DB_NAME}
+      POSTGRES_USER: ${ADMIN_DB_USER}
+      POSTGRES_PASSWORD: ${ADMIN_DB_PASSWORD}
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-admin-data:/var/lib/postgresql/data
+      - ./scripts/db-init/admin:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ADMIN_DB_USER} -d ${ADMIN_DB_NAME}"]
+      interval: 10s
+      retries: 5
+    networks: [admin-net, infra-net]
+    profiles: ["infra"]
+
+  # ============================================================
+  # Common Infra - Redis & Kafka
+  # ============================================================
+
+  redis:
+    image: redis:7-alpine
+    container_name: xledger-redis
+    env_file: .env
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    networks: [infra-net]
+    profiles: ["infra"]
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: xledger-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-logs:/var/lib/zookeeper/log
+    healthcheck:
+      test: ["CMD-SHELL", "echo srvr | nc localhost 2181 || exit 1"]
+      interval: 10s
+      retries: 5
+    networks: [infra-net]
+    profiles: ["infra"]
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: xledger-kafka
+    depends_on:
+      zookeeper: { condition: service_healthy }
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      # INTERNAL: dev 컨테이너 내부 통신용, EXTERNAL: 호스트 도구 접속용
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "29092:29092"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092"]
+      interval: 10s
+      retries: 5
+    networks: [infra-net]
+    profiles: ["infra"]
+
+  # ============================================================
+  # Dev Service - 독립 실행 및 Testcontainers 최적화
+  # ============================================================
+
+  dev:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    container_name: xledger-dev
+    env_file: .env
+    command: sleep infinity
+    volumes:
+      - .:/workspace:cached
+      - gradle-cache:/home/vscode/.gradle
+      - /var/run/docker.sock:/var/run/docker.sock # DooD 활성화
+    environment:
+      # Testcontainers가 호스트의 infra-net을 사용하여 형제 컨테이너와 통신하게 함
+      - TESTCONTAINERS_DOCKER_NETWORK=${COMPOSE_PROJECT_NAME:-xledger}_infra-net
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    networks:
+      - account-net
+      - cash-net
+      - ledger-net
+      - admin-net
+      - infra-net
