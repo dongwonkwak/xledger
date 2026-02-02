@@ -19,9 +19,10 @@ Xledger는 **Docker Compose 통합 DevContainer** 환경에서 개발합니다. 
 │  │  │   - Docker socket 마운트                │
 │  │  │                                       │
 │  │  ├── postgres-account:5432               │
-│  │  ├── postgres-cash:5432 (호스트:5433)      │
-│  │  ├── postgres-ledger:5432 (호스트:5434)    │
-│  │  ├── postgres-admin:5432 (호스트:5435)     │
+│  │  ├── postgres-account:5432 (호스트:5431)   │
+│  │  ├── postgres-cash:5432 (호스트:5432)      │
+│  │  ├── postgres-ledger:5432 (호스트:5433)    │
+│  │  ├── postgres-admin:5432 (호스트:5434)     │
 │  │  ├── redis:6379                          │
 │  │  ├── kafka:9092                          │
 │  │  └── zookeeper:2181                      │
@@ -71,10 +72,10 @@ docker compose --project-name xledger --profile infra down
 
 | 서비스 | DevContainer 내부 | 호스트 포트 | 환경변수 |
 |--------|------------------|-----------|---------|
-| PostgreSQL (account) | `postgres-account:5432` | 5432 | `POSTGRES_ACCOUNT_HOST` |
-| PostgreSQL (cash) | `postgres-cash:5432` | 5433 | `POSTGRES_CASH_HOST` |
-| PostgreSQL (ledger) | `postgres-ledger:5432` | 5434 | `POSTGRES_LEDGER_HOST` |
-| PostgreSQL (admin) | `postgres-admin:5432` | 5435 | `POSTGRES_ADMIN_HOST` |
+| PostgreSQL (account) | `postgres-account:5432` | 5431 | `POSTGRES_ACCOUNT_HOST` |
+| PostgreSQL (cash) | `postgres-cash:5432` | 5432 | `POSTGRES_CASH_HOST` |
+| PostgreSQL (ledger) | `postgres-ledger:5432` | 5433 | `POSTGRES_LEDGER_HOST` |
+| PostgreSQL (admin) | `postgres-admin:5432` | 5434 | `POSTGRES_ADMIN_HOST` |
 | Redis | `redis:6379` | 6379 | `REDIS_HOST` |
 | Kafka | `kafka:9092` | 29092 | `KAFKA_BOOTSTRAP_SERVERS` |
 | Zookeeper | `zookeeper:2181` | 2181 | - |
@@ -89,7 +90,7 @@ spring.kafka.bootstrap-servers=${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
 
 **호스트에서 접속** (데이터베이스 클라이언트 등):
 ```bash
-psql -h localhost -p 5432 -U xledger -d xledger_account
+psql -h localhost -p 5431 -U xledger -d xledger_account
 ```
 
 | 서비스 | 포트 | 접속 URL (DevContainer 내부) |
@@ -159,10 +160,10 @@ docker compose --project-name xledger --profile infra down
 
 | 서비스 | 컨테이너 호스트명 | 기본 호스트 포트 |
 |---|---:|---:|
-| PostgreSQL (account) | postgres-account:5432 | 5432 |
-| PostgreSQL (cash) | postgres-cash:5432 | 5433 |
-| PostgreSQL (ledger) | postgres-ledger:5432 | 5434 |
-| PostgreSQL (admin) | postgres-admin:5432 | 5435 |
+| PostgreSQL (account) | postgres-account:5432 | 5431 |
+| PostgreSQL (cash) | postgres-cash:5432 | 5432 |
+| PostgreSQL (ledger) | postgres-ledger:5432 | 5433 |
+| PostgreSQL (admin) | postgres-admin:5432 | 5434 |
 | Redis | redis:6379 | 6379 |
 | Kafka | kafka:9092 | 29092 (호스트 바인딩 시) |
 | Zookeeper | zookeeper:2181 | 2181 |
@@ -178,7 +179,7 @@ spring.kafka.bootstrap-servers=${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
 호스트에서 DB 접속 예:
 
 ```bash
-psql -h localhost -p 5432 -U xledger -d xledger_account
+psql -h localhost -p 5431 -U xledger -d xledger_account
 ```
 
 ---
